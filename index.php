@@ -30,8 +30,8 @@ session_start();
                         <button><img width="30" height="30" src="https://img.icons8.com/material-rounded/24/expand-arrow--v1.png" alt="expand-arrow--v1" /></button>
                     </div>
                 <?php } else { ?>
-                    <ul class="flex auth-list">
-                        <li><a href="index.php?page=login" class="auth_link btn log_btn">login</a></li>
+                    <ul class="flex auth-list" style="align-items: center;">
+                        <li><button class="auth_link btn log_btn" id="openAuth">login</button></li>
                         <li><a href="index.php?page=signup" class="auth_link btn sign_btn">sign Up</a></li>
                     </ul>
                 <?php } ?>
@@ -255,7 +255,7 @@ session_start();
             <div class="container flex flex-col" style="align-items: center;">
                 <!-- Header -->
                 <div style="margin-bottom: 1rem;">
-                    <span class="badge">Our Collection</span>
+                    <span class="badge" style="margin-bottom: 3rem;">Our Collection</span>
                 </div>
                 <div class="section-header flex-space">
                     <div class="header-content">
@@ -786,39 +786,6 @@ session_start();
                 </div>
             </div>
         </section>
-
-
-        <!-- car slide script -->
-        <script>
-            // Slider functionality
-            const sliderTrack = document.getElementById('sliderTrack');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-
-            let currentIndex = 0;
-            const itemsPerPage = 2.4;
-            const totalItems = 9; // 8 cars + 1 see more card
-            const maxIndex = Math.max(0, totalItems - itemsPerPage);
-
-            function updateSlider() {
-                const translateX = -(currentIndex * (100 / itemsPerPage));
-                sliderTrack.style.transform = `translateX(${translateX}%)`;
-            }
-
-            prevBtn.addEventListener('click', () => {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    updateSlider();
-                }
-            });
-
-            nextBtn.addEventListener('click', () => {
-                if (currentIndex < maxIndex) {
-                    currentIndex++;
-                    updateSlider();
-                }
-            });
-        </script>
     </main>
 
     <!-- FOOTER -->
@@ -934,6 +901,38 @@ session_start();
             </div>
         </div>
     </footer>
+
+    <!-- car slide script -->
+    <script>
+        // Slider functionality
+        const sliderTrack = document.getElementById('sliderTrack');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        let currentIndex = 0;
+        const itemsPerPage = 2.4;
+        const totalItems = 9; // 8 cars + 1 see more card
+        const maxIndex = Math.max(0, totalItems - itemsPerPage);
+
+        function updateSlider() {
+            const translateX = -(currentIndex * (100 / itemsPerPage));
+            sliderTrack.style.transform = `translateX(${translateX}%)`;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSlider();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < maxIndex) {
+                currentIndex++;
+                updateSlider();
+            }
+        });
+    </script>
 </body>
 
 </html>
