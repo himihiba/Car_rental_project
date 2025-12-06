@@ -80,7 +80,7 @@ function renderHeader($title = 'LUXDRIVE')
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php echo htmlspecialchars($title); ?></title>
-        <link rel="stylesheet" href="styleV01.css">
+        <link rel="stylesheet" href="styleV02.css">
     </head>
 
     <body>
@@ -809,21 +809,27 @@ function renderHeader($title = 'LUXDRIVE')
                         <!-- See More Card -->
                         <div class="slider-item">
                             <div class="see-more-card">
-                                <div class="see-more-icon">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                    </svg>
-                                </div>
+                                <a href="index.php?page=browse" style="color:white;">
+                                    <div class="see-more-icon">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                        </svg>
+                                    </div>
+                                </a>
+
                                 <h3 class="see-more-title">View All Cars</h3>
                                 <p class="see-more-text">
                                     Explore our complete collection of luxury vehicles
                                 </p>
-                                <button class="see-more-button">
-                                    <span>See More</span>
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                    </svg>
-                                </button>
+                                <a href="index.php?page=browse">
+                                    <button class="see-more-button">
+                                        <span>See More</span>
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                        </svg>
+                                    </button>
+                                </a>
+
                             </div>
                         </div>
                     </div>
@@ -1041,6 +1047,98 @@ function renderHeader($title = 'LUXDRIVE')
             });
         </script>
 
+    <?php
+    }
+    function renderBrowseCars()
+    {
+    ?>
+        <main class="main">
+            <section class="browse-section">
+                <div class="container">
+                    <div class="browse-header">
+                        <h2>Browse Available Cars</h2>
+                        <p class="browse-subtitle">Choose from our exclusive collection of luxury vehicles</p>
+                    </div>
+
+                    <!-- Filter Form -->
+                    <form method="GET" action="?page=browse" class="browse-search-form">
+                        <div class="flex gap-2 form-row">
+                            <div class="form-group">
+                                <label class="form-label">Pick-up Date</label>
+                                <input type="date" name="start_date" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Return Date</label>
+                                <input type="date" name="end_date" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Car Type</label>
+                                <select name="car_type" class="form-input browse-select">
+                                    <option value="">All Types</option>
+                                    <option value="sedan">Sedan</option>
+                                    <option value="suv">SUV</option>
+                                    <option value="luxury">Luxury</option>
+                                    <option value="sports">Sports</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-brws btn-serch">Find Available Cars</button>
+                    </form>
+
+                    <!-- Car Grid -->
+                    <div class="browse-grid">
+                        <?php
+                        $cars = [
+                            ['name' => 'Mercedes-Benz', 'model' => 'S-Class 2023', 'price' => 250, 'image' => 'https://images.unsplash.com/photo-1758216383800-7023ee8ed42b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBzZWRhbnxlbnwxfHx8fDE3NjQ5MzE4MzJ8MA&ixlib=rb-4.1.0&q=80&w=1080'],
+                            ['name' => 'BMW', 'model' => '7 Series', 'price' => 280, 'image' => 'https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'],
+                            ['name' => 'Audi', 'model' => 'RS e-tron GT', 'price' => 320, 'image' => 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800&q=80'],
+                            ['name' => 'Porsche', 'model' => 'Panamera', 'price' => 350, 'image' => 'https://images.unsplash.com/photo-1601679147136-22d1032399e4?q=80&w=1112&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'],
+                            ['name' => 'Range Rover', 'model' => 'Autobiography', 'price' => 300, 'image' => 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=800&q=80'],
+                            ['name' => 'Bentley', 'model' => 'Continental GT', 'price' => 450, 'image' => 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=800&q=80'],
+                        ];
+
+                        foreach ($cars as $car) {
+                        ?>
+                            <div class="car-card">
+                                <div class="car-image-container">
+                                    <img src="<?php echo $car['image']; ?>" alt="<?php echo $car['name']; ?>" class="car-image">
+                                    <div class="status-badge">
+                                        <span class="status-available">● Available</span>
+                                    </div>
+                                </div>
+                                <div class="car-details">
+                                    <div>
+                                        <h3 class="car-title"><?php echo $car['name']; ?></h3>
+                                        <p class="car-subtitle"><?php echo $car['model']; ?></p>
+                                    </div>
+                                    <div class="car-specs">
+                                        <div class="spec-item">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                            </svg>
+                                            <span>5,000 km</span>
+                                        </div>
+                                        <div class="spec-item">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                                            </svg>
+                                            <span>Black</span>
+                                        </div>
+                                    </div>
+                                    <div class="car-footer">
+                                        <div>
+                                            <div class="car-price">$<?php echo $car['price']; ?></div>
+                                            <div class="price-label">per day</div>
+                                        </div>
+                                        <a href="index.php?page=car-details&id=1"><button class="view-more-button">View More</button></a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php } ?>
+                    </div>
+                </div>
+            </section>
+        </main>
     <?php
     }
     function renderAuth()
