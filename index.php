@@ -1,71 +1,71 @@
 <?php
-// Database constants
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'car_rental_agency');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('BASE_URL', (
-    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http'
-) . '://' . preg_replace('/[^A-Za-z0-9\.\-:_]/', '', $_SERVER['HTTP_HOST']) . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/');
+// // Database constants
+// define('DB_HOST', 'localhost');
+// define('DB_NAME', 'car_rental_agency');
+// define('DB_USER', 'root');
+// define('DB_PASS', '');
+// define('BASE_URL', (
+// 	(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http'
+// ) . '://' . preg_replace('/[^A-Za-z0-9\.\-:_]/', '', $_SERVER['HTTP_HOST']) . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/');
 
 // Start Session
 session_start();
 
-// Database Connection
-function getDB()
-{
-    static $db = null;
-    if ($db === null) {
-        try {
-            $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-            $db = new PDO($dsn, DB_USER, DB_PASS);
-            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            die("Database connection failed: " . $e->getMessage());
-        }
-    }
-    return $db;
-}
+// // Database Connection
+// function getDB()
+// {
+// 	static $db = null;
+// 	if ($db === null) {
+// 		try {
+// 			$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+// 			$db = new PDO($dsn, DB_USER, DB_PASS);
+// 			$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// 			$db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+// 		} catch (PDOException $e) {
+// 			die("Database connection failed: " . $e->getMessage());
+// 		}
+// 	}
+// 	return $db;
+// }
 
-// Create Database and Tables if not exists
-function initializeDatabase()
-{
-    $db = getDB();
+// // Create Database and Tables if not exists
+// function initializeDatabase()
+// {
+// 	$db = getDB();
 
-    $sql = file_get_contents('database.sql');
-    if ($sql) {
-        $db->exec($sql);
-    }
-}
+// 	$sql = file_get_contents('database.sql');
+// 	if ($sql) {
+// 		$db->exec($sql);
+// 	}
+// }
 
 
-// Security Functions
+// // Security Functions
 function sanitize($data)
 {
     return htmlspecialchars(strip_tags(trim($data)));
 }
 
-function hashPassword($password)
-{
-    return password_hash($password, PASSWORD_DEFAULT);
-}
+// function hashPassword($password)
+// {
+// 	return password_hash($password, PASSWORD_DEFAULT);
+// }
 
-function verifyPassword($password, $hash)
-{
-    return password_verify($password, $hash);
-}
+// function verifyPassword($password, $hash)
+// {
+// 	return password_verify($password, $hash);
+// }
 
-// Check if user is logged in as staff
-function isStaffLoggedIn()
-{
-    return isset($_SESSION['staff_id']);
-}
+// // Check if user is logged in as staff
+// function isStaffLoggedIn()
+// {
+// 	return isset($_SESSION['staff_id']);
+// }
 
-function isAdmin()
-{
-    return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
-}
+// function isAdmin()
+// {
+// 	return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+// }
 
 // HTML TEMPLATE FUNCTIONS
 
@@ -80,7 +80,7 @@ function renderHeader($title = 'LUXDRIVE')
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php echo htmlspecialchars($title); ?></title>
-        <link rel="stylesheet" href="styleV02.css">
+        <link rel="stylesheet" href="styleV03.css">
     </head>
 
     <body>
@@ -259,7 +259,11 @@ function renderHeader($title = 'LUXDRIVE')
                 <p class="p_hero">Premium car rental at affordable rates. Worldwide.</p>
                 <div class="btn_hero flex gap-2">
                     <a href="?page=browse" class="btn btn-brws">Browse Our Fleet</a>
-                    <a href="?page=login" class="btn btn-bok">Book Now</a>
+                    <?php if (isset($_SESSION['user_id'])) { ?>
+                        <a href="?page=browse" class="btn btn-bok">Book Now</a>
+                    <?php } else { ?>
+                        <a href="?page=auth" class="btn btn-bok">Book Now</a>
+                    <?php } ?>
                 </div>
                 <form method="GET" action="?page=browse" class="search-form flex-column">
                     <div class="flex gap-2 form-row">
@@ -1141,6 +1145,139 @@ function renderHeader($title = 'LUXDRIVE')
         </main>
     <?php
     }
+    function renderCarDetails()
+    {
+        // Mock car data - normally this would come from the database based on $_GET['id']
+        $car = [
+            'name' => 'Mercedes-Benz',
+            'model' => 'C-Class',
+            'year' => '2023',
+            'type' => 'Sedan',
+            'price' => 120,
+            'image' => 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=80',
+            'gallery' => [
+                'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800&q=80',
+                'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800&q=80',
+                'https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                'https://images.unsplash.com/photo-1601679147136-22d1032399e4?q=80&w=1112&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+            ],
+            'specs' => [
+                'Seats' => '5 Passengers',
+                'Transmission' => 'Automatic',
+                'Fuel Type' => 'Gasoline',
+                'Mileage' => '12,000 mi'
+            ],
+            'features' => ['GPS', 'Bluetooth', 'Sunroof', 'Leather Seats'],
+            'info' => [
+                'Color' => 'Silver',
+                'License Plate' => 'DEF456',
+                'Year' => '2023'
+            ]
+        ];
+    ?>
+        <main class="main car-details-main">
+            <div class="container">
+                <!-- Back Navigation -->
+                <div class="back-nav">
+                    <a href="index.php?page=browse" class="back-link">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Back to Browse
+                    </a>
+                </div>
+
+                <div class="details-grid">
+                    <!-- Left Column: Gallery -->
+                    <div class="gallery-container">
+                        <img src="<?php echo $car['image']; ?>" alt="<?php echo $car['name']; ?>" class="main-image" id="mainImage">
+                        <div class="thumbnail-grid">
+                            <img src="<?php echo $car['image']; ?>" class="thumbnail" onclick="changeImage(this.src)">
+                            <?php foreach ($car['gallery'] as $img): ?>
+                                <img src="<?php echo $img; ?>" class="thumbnail" onclick="changeImage(this.src)">
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Details -->
+                    <div class="car-info-wrapper">
+                        <div class="car-info-header">
+                            <div class="flex-space" style="align-items: flex-start;">
+                                <div>
+                                    <h1 class="detail-title"><?php echo $car['name']; ?> <br> <?php echo $car['model']; ?></h1>
+                                    <p class="detail-model"><?php echo $car['year']; ?> • <?php echo $car['type']; ?></p>
+                                </div>
+                                <span class="status-badge" style="position: static; background: #dcfce7; color: #16a34a;">Available</span>
+                            </div>
+
+                            <div class="detail-price-box">
+                                <span class="detail-price">$<?php echo $car['price']; ?></span>
+                                <span class="detail-price-label">/day</span>
+                            </div>
+                        </div>
+
+                        <div class="specs-section">
+                            <h3 class="section-label">Specifications</h3>
+                            <div class="specs-grid">
+                                <?php foreach ($car['specs'] as $label => $value): ?>
+                                    <div class="spec-detail-item">
+                                        <div class="spec-icon">
+                                            <!-- Simple icons based on label -->
+                                            <?php if ($label == 'Seats') {
+                                                echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l-5-5 5-5M17 7l5 5-5 5"/></svg>'; // Placeholder icon 
+                                            ?>
+                                            <?php } else { ?>
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <path d="M12 6v6l4 2"></path>
+                                                </svg>
+                                            <?php } ?>
+                                        </div>
+                                        <div class="spec-content">
+                                            <label><?php echo $label; ?></label>
+                                            <span><?php echo $value; ?></span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <div class="features-section">
+                            <h3 class="section-label">Features</h3>
+                            <div class="features-list">
+                                <?php foreach ($car['features'] as $feature): ?>
+                                    <div class="feature-check">
+                                        <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                        <?php echo $feature; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <h3 class="section-label">Additional Information</h3>
+                            <?php foreach ($car['info'] as $label => $value): ?>
+                                <div class="info-row">
+                                    <span class="info-label"><?php echo $label; ?></span>
+                                    <span class="info-value"><?php echo $value; ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <a href="index.php?page=book"><button class="book-now-btn">Book This Car</button></a>
+                    </div>
+                </div>
+            </div>
+            <script>
+                function changeImage(src) {
+                    document.getElementById('mainImage').src = src;
+                }
+            </script>
+        </main>
+    <?php
+    }
     function renderAuth()
     {
     ?>
@@ -1384,7 +1521,7 @@ function renderHeader($title = 'LUXDRIVE')
             renderAuth();
             break;
         case 'car-details':
-            render();
+            renderCarDetails();
             break;
         case 'book':
             renderBookPage();
