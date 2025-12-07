@@ -1,9 +1,4 @@
 <?php
-// ============================================
-// LUXDRIVE - Car Rental System
-// Backend Implementation with Database
-// ============================================
-
 session_start();
 
 // Database Configuration
@@ -12,10 +7,7 @@ $user = "root";
 $pass = "";
 $dbname = "luxdrive";
 
-// Global PDO connection
 $pdo = null;
-
-// DATABASE INITIALIZATION
 
 function initializeDatabase()
 {
@@ -29,7 +21,7 @@ function initializeDatabase()
         $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Check if tables exist
+
         $stmt = $pdo->query("SHOW TABLES LIKE 'clients'");
         if ($stmt->rowCount() == 0) {
             createTables();
@@ -177,8 +169,6 @@ function createTriggersAndViews()
 }
 
 
-// SECURITY FUNCTIONS
-
 function sanitize($data)
 {
     return htmlspecialchars(strip_tags(trim($data)));
@@ -207,7 +197,6 @@ function requireLogin()
     }
 }
 
-
 // AUTHENTICATION HANDLERS
 
 function handleLogin()
@@ -224,8 +213,7 @@ function handleLogin()
         return ['error' => 'Please fill in all fields'];
     }
 
-    // Check clients 
-
+    // Check clients first
     $stmt = $pdo->prepare("SELECT client_id, first_name, last_name, email, password_hash FROM clients WHERE email = ?");
     $stmt->execute([$email]);
     $client = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -396,7 +384,7 @@ function getClientRentals($clientId)
     global $pdo;
 
     $stmt = $pdo->prepare("
-        SELECT r.*, c.brand, c.model, c.image_url, c.license_plate,
+        SELECT r.*, c.brand, c.model, c.year, c.image_url, c.license_plate,
                p.status as payment_status, p.method as payment_method
         FROM rentals r
         JOIN cars c ON r.car_id = c.car_id
@@ -425,9 +413,9 @@ function updateClientProfile($clientId, $data)
     return $stmt->execute([$data['first_name'], $data['last_name'], $data['phone'], $data['address'], $clientId]);
 }
 
-// ============================================
+
 // BOOKING HANDLER
-// ============================================
+
 function handleBooking()
 {
     global $pdo;
@@ -492,7 +480,7 @@ function handleProfileUpdate()
     return ['error' => 'Failed to update profile'];
 }
 
-// Initialize database
+
 initializeDatabase();
 
 // Handle form submissions
@@ -506,9 +494,7 @@ if (isset($_GET['page']) && $_GET['page'] === 'logout') {
     handleLogout();
 }
 
-// ============================================
-// RENDER FUNCTIONS
-// ============================================
+
 function renderHeader($title = 'LUXDRIVE')
 {
 ?>
@@ -519,7 +505,7 @@ function renderHeader($title = 'LUXDRIVE')
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php echo htmlspecialchars($title); ?></title>
-        <link rel="stylesheet" href="styleV06.css">
+        <link rel="stylesheet" href="styleV09.css">
     </head>
 
     <body>
@@ -659,7 +645,6 @@ function renderHeader($title = 'LUXDRIVE')
             </div>
         </footer>
         <script>
-            // Dropdown menu
             const toggleBtn = document.querySelector(".dropdown-toggle");
             const menu = document.querySelector(".dropdown-menu");
             if (toggleBtn && menu) {
@@ -677,9 +662,9 @@ function renderHeader($title = 'LUXDRIVE')
 <?php
     }
 
-    // ============================================
+
     // HOME PAGE
-    // ============================================
+
     function renderHomePage()
     {
         $cars = getCars(['status' => 'available']);
@@ -1058,9 +1043,9 @@ function renderHeader($title = 'LUXDRIVE')
 <?php
     }
 
-    // ============================================
+
     // BROWSE CARS PAGE
-    // ============================================
+
     function renderBrowseCars()
     {
         $filters = ['status' => 'available'];
@@ -1131,9 +1116,9 @@ function renderHeader($title = 'LUXDRIVE')
 <?php
     }
 
-    // ============================================
+
     // CAR DETAILS PAGE
-    // ============================================
+
     function renderCarDetails()
     {
         $carId = intval($_GET['id'] ?? 0);
@@ -1144,7 +1129,7 @@ function renderHeader($title = 'LUXDRIVE')
         }
         global $bookingResult;
 ?>
-    <div class="container details-section">
+    <div class="container" style="padding-block: 4rem;">
         <div class="back-nav"><a href="index.php?page=browse" class="back-link"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg> Back to Browse</a></div>
@@ -1229,6 +1214,7 @@ function renderHeader($title = 'LUXDRIVE')
 
     function includeBookingModals($car)
     {
+        global $bookingResult;
 ?>
     <div id="booking-modal-step1" class="booking-modal">
         <div class="booking-modal-content">
@@ -1477,12 +1463,37 @@ function renderHeader($title = 'LUXDRIVE')
             });
         });
     </script>
+    <?php if (isset($bookingResult['success']) && $bookingResult['success']):
+            $days = 1;
+            if (isset($_POST['start_date']) && isset($_POST['end_date'])) {
+                try {
+                    $start = new DateTime($_POST['start_date']);
+                    $end = new DateTime($_POST['end_date']);
+                    $days = max(1, $start->diff($end)->days);
+                    // If return date is same as pickup, it's 1 day. If next day, it's 1 day difference? 
+                    // In the JS: Math.ceil((ret - pickup) / (1000 * 60 * 60 * 24))
+                    // 2023-01-01 to 2023-01-02 is 1 day.
+                } catch (Exception $e) {
+                }
+            }
+    ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const modal = document.getElementById('booking-modal-step4');
+                if (modal) {
+                    document.getElementById('confirmed-duration').innerText = '<?php echo $days; ?> day<?php echo $days > 1 ? 's' : ''; ?>';
+                    document.getElementById('confirmed-total').innerText = '$<?php echo number_format((float)($_POST['total_price'] ?? 0), 2); ?>';
+                    modal.style.display = 'block';
+                }
+            });
+        </script>
+    <?php endif; ?>
 <?php
     }
 
-    // ============================================
+
     // AUTH PAGE
-    // ============================================
+
     function renderAuth()
     {
         global $authError;
@@ -1579,9 +1590,48 @@ function renderHeader($title = 'LUXDRIVE')
 <?php
     }
 
-    // ============================================
+
+    // Profile Sidebar
+
+    function renderDashboardSidebar($activePage)
+    {
+        $initials = $_SESSION['user_initials'] ?? 'U';
+        $name = $_SESSION['user_name'] ?? 'User';
+        $email = $_SESSION['user_email'] ?? '';
+?>
+    <div class="dashboard-sidebar">
+        <div class="user-profile-summary">
+            <div class="user-avatar"><?php echo htmlspecialchars($initials); ?></div>
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.25rem;"><?php echo htmlspecialchars($name); ?></h3>
+            <p style="color: var(--text-light); font-size: 0.9rem;"><?php echo htmlspecialchars($email); ?></p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="index.php?page=profile" class="sidebar-link <?php echo $activePage === 'profile' ? 'active' : ''; ?>">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                My Account
+            </a>
+            <a href="index.php?page=rental_history" class="sidebar-link <?php echo $activePage === 'rentals' ? 'active' : ''; ?>">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+                My Rentals
+            </a>
+            <a href="index.php?page=logout" class="sidebar-link" style="color: #ef4444;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Sign Out
+            </a>
+        </nav>
+    </div>
+<?php
+    }
+
+
     // PROFILE PAGE
-    // ============================================
+
     function renderProfile()
     {
         if (!isClient()) {
@@ -1590,36 +1640,215 @@ function renderHeader($title = 'LUXDRIVE')
         }
         global $profileResult;
         $profile = getClientProfile($_SESSION['user_id']);
+        $rentals = getClientRentals($_SESSION['user_id']);
+
+        $totalRentals = count($rentals);
+        $activeRentals = 0;
+        $totalSpent = 0;
+        foreach ($rentals as $r) {
+            if ($r['status'] === 'ongoing') $activeRentals++;
+            if ($r['status'] !== 'cancelled') $totalSpent += $r['total_price'];
+        }
+
+        $initials = $_SESSION['user_initials'] ?? 'U';
 ?>
-    <div class="container" style="padding: 2rem 0;">
-        <h2 style="margin-bottom: 2rem;">My Profile</h2>
-        <?php if ($profileResult && isset($profileResult['success'])): ?>
-            <div style="background: #dcfce7; color: #16a34a; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;"><?php echo htmlspecialchars($profileResult['success']); ?></div>
-        <?php endif; ?>
-        <?php if ($profileResult && isset($profileResult['error'])): ?>
-            <div style="background: #fee2e2; color: #dc2626; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;"><?php echo htmlspecialchars($profileResult['error']); ?></div>
-        <?php endif; ?>
-        <div class="form-card" style="max-width: 600px;">
-            <form method="POST" action="index.php?page=profile">
-                <input type="hidden" name="action" value="update_profile">
-                <div class="form-row">
-                    <div class="form-group"><label>First Name</label><input type="text" name="first_name" value="<?php echo htmlspecialchars($profile['first_name']); ?>" required></div>
-                    <div class="form-group"><label>Last Name</label><input type="text" name="last_name" value="<?php echo htmlspecialchars($profile['last_name']); ?>" required></div>
+    <div class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <div class="title-wrapper">
+                    <div class="title-accent"></div>
+                    <h2 class="page-title">My Profile</h2>
                 </div>
-                <div class="form-group"><label>Email</label><input type="email" value="<?php echo htmlspecialchars($profile['email']); ?>" disabled></div>
-                <div class="form-group"><label>Phone</label><input type="tel" name="phone" value="<?php echo htmlspecialchars($profile['phone'] ?? ''); ?>"></div>
-                <div class="form-group"><label>Driver License</label><input type="text" value="<?php echo htmlspecialchars($profile['driver_license']); ?>" disabled></div>
-                <div class="form-group"><label>Address</label><input type="text" name="address" value="<?php echo htmlspecialchars($profile['address'] ?? ''); ?>"></div>
-                <button type="submit" class="submit-btn">Update Profile</button>
-            </form>
+                <p class="page-subtitle">Manage your personal information and preferences</p>
+            </div>
+
+            <?php if ($profileResult && isset($profileResult['success'])): ?>
+                <div style="background: #dcfce7; color: #16a34a; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #bbf7d0;"><?php echo htmlspecialchars($profileResult['success']); ?></div>
+            <?php endif; ?>
+            <?php if ($profileResult && isset($profileResult['error'])): ?>
+                <div style="background: #fee2e2; color: #dc2626; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #fecaca;"><?php echo htmlspecialchars($profileResult['error']); ?></div>
+            <?php endif; ?>
+
+            <div class="profile-layout">
+                <aside class="profile-sidebar">
+                    <div class="profile-card">
+                        <div class="profile-image-wrapper">
+                            <div class="profile-image-container">
+                                <div class="profile-image-border">
+                                    <div class="profile-image-inner">
+                                        <div style="width:100%; height:100%; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; color:white; font-size:2.5rem; font-weight:600;">
+                                            <?php echo $initials; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="camera-btn">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                        <circle cx="12" cy="13" r="4"></circle>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+
+                        <div class="user-info">
+                            <h3 class="user-name"><?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?></h3>
+                            <p class="user-email"><?php echo htmlspecialchars($profile['email']); ?></p>
+                        </div>
+
+
+                        <div class="user-stats">
+                            <div class="stat-row">
+                                <span class="stat-label">Member Since</span>
+                                <span class="stat-value"><?php echo date('Y', strtotime($profile['registration_date'])); ?></span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Total Rentals</span>
+                                <span class="stat-value"><?php echo $totalRentals; ?> trips</span>
+                            </div>
+                        </div>
+
+
+                        <div class="quick-actions">
+                            <a href="index.php?page=rental_history"><button class="action-btn">View Rental History</button></a>
+                        </div>
+                    </div>
+                </aside>
+
+
+                <main class="profile-main">
+                    <div class="form-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h3 class="form-title" style="margin-bottom: 0;">Personal Information</h3>
+                            <button type="button" id="editProfileBtn" class="action-btn" style="width: auto;" onclick="toggleEditMode()">Edit Profile</button>
+                        </div>
+
+                        <form class="profile-form" method="POST" action="index.php?page=profile" id="profileForm">
+                            <input type="hidden" name="action" value="update_profile">
+
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">First Name</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" name="first_name" class="form-input editable-input" value="<?php echo htmlspecialchars($profile['first_name']); ?>" required disabled>
+                                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Last Name</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" name="last_name" class="form-input editable-input" value="<?php echo htmlspecialchars($profile['last_name']); ?>" required disabled>
+                                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <div class="input-wrapper">
+                                    <input type="email" class="form-input" value="<?php echo htmlspecialchars($profile['email']); ?>" disabled style="background: #f3f4f6; cursor: not-allowed;">
+                                    <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="form-label">Phone</label>
+                                <div class="input-wrapper">
+                                    <input type="tel" name="phone" class="form-input editable-input" value="<?php echo htmlspecialchars($profile['phone'] ?? ''); ?>" disabled>
+                                    <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="form-label">Driver License</label>
+                                <div class="input-wrapper">
+                                    <input type="text" class="form-input" value="<?php echo htmlspecialchars($profile['driver_license']); ?>" disabled style="background: #f3f4f6; cursor: not-allowed;">
+                                    <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="form-label">Address</label>
+                                <div class="input-wrapper">
+                                    <textarea name="address" class="form-textarea editable-input" rows="3" disabled><?php echo htmlspecialchars($profile['address'] ?? ''); ?></textarea>
+                                    <svg class="input-icon input-icon-textarea" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                </div>
+                            </div>
+
+
+                            <div class="form-actions" id="actionButtons" style="display: none;">
+                                <button type="submit" class="btn-primary">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                        <polyline points="7 3 7 8 15 8"></polyline>
+                                    </svg>
+                                    <span>Save Changes</span>
+                                </button>
+                                <button type="button" class="btn-secondary" onclick="toggleEditMode()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </main>
+            </div>
         </div>
     </div>
+    <script>
+        function toggleEditMode() {
+            const form = document.getElementById('profileForm');
+            const inputs = form.querySelectorAll('.editable-input');
+            const actionButtons = document.getElementById('actionButtons');
+            const editBtn = document.getElementById('editProfileBtn');
+
+            let isEditing = actionButtons.style.display !== 'none';
+
+            if (isEditing) {
+                // Switching to View Mode (Cancel)
+                inputs.forEach(input => {
+                    input.disabled = true;
+                    input.style.backgroundColor = '#f9fafb';
+                });
+                actionButtons.style.display = 'none';
+                editBtn.style.display = 'block';
+            } else {
+                // Switching to Edit Mode
+                inputs.forEach(input => {
+                    input.disabled = false;
+                    input.style.backgroundColor = 'white';
+                });
+                actionButtons.style.display = 'flex';
+                editBtn.style.display = 'none';
+            }
+        }
+    </script>
 <?php
     }
 
-    // ============================================
-    // RENTAL HISTORY PAGE
-    // ============================================
+
+    // Rental History Page
+
     function renderRentalHistory()
     {
         if (!isClient()) {
@@ -1627,52 +1856,151 @@ function renderHeader($title = 'LUXDRIVE')
             exit;
         }
         $rentals = getClientRentals($_SESSION['user_id']);
+
+
+        $totalRentals = count($rentals);
+        $milesDriven = 0;
+        foreach ($rentals as $r) {
+            $milesDriven += ((isset($r['mileage']) && $r['mileage']) ? $r['mileage'] / 100 : 0);
+        } // Just a dummy calc for show
+        $formattedMiles = number_format($milesDriven > 0 ? $milesDriven : 1250); // Dummy default if 0
 ?>
-    <div class="container" style="padding: 2rem 0;">
-        <h2 style="margin-bottom: 2rem;">My Rental History</h2>
-        <?php if (empty($rentals)): ?>
-            <div style="text-align: center; padding: 3rem;">
-                <h3>No rentals yet</h3>
-                <p>Start your luxury journey by booking a car!</p><a href="index.php?page=browse" class="btn btn-brws" style="margin-top: 1rem; display: inline-block;">Browse Cars</a>
-            </div>
-        <?php else: ?>
-            <div class="browse-grid">
-                <?php foreach ($rentals as $rental): ?>
-                    <div class="car-card">
-                        <div class="car-image-container"><img src="<?php echo htmlspecialchars($rental['image_url'] ?: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=80'); ?>" alt="<?php echo htmlspecialchars($rental['brand']); ?>" class="car-image">
-                            <div class="status-badge"><span class="<?php echo $rental['status'] === 'ongoing' ? 'status-available' : ''; ?>" style="<?php echo $rental['status'] !== 'ongoing' ? 'color: #6b7280;' : ''; ?>">● <?php echo ucfirst($rental['status']); ?></span></div>
+
+    <div class="hero-section">
+        <div class="container">
+            <div class="hero-card">
+                <div class="hero-decorative hero-decorative-1"></div>
+                <div class="hero-decorative hero-decorative-2"></div>
+
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <div class="hero-title-wrapper">
+                            <svg class="sparkle-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2v20M2 12h20M6.5 6.5l11 11M6.5 17.5l11-11" />
+                            </svg>
+                            <span class="hero-subtitle">Welcome Back</span>
                         </div>
-                        <div class="car-details">
-                            <div>
-                                <h3 class="car-title"><?php echo htmlspecialchars($rental['brand']); ?></h3>
-                                <p class="car-subtitle"><?php echo htmlspecialchars($rental['model']); ?></p>
+                        <h2 class="hero-heading">My Rental History</h2>
+                        <p class="hero-description">
+                            Your journey with the world's finest automobiles. Every mile tells a story.
+                        </p>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                    <polyline points="17 6 23 6 23 12"></polyline>
+                                </svg>
+                                <span><?php echo $totalRentals; ?></span>
                             </div>
-                            <div class="car-specs">
-                                <div class="spec-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg><span><?php echo $rental['start_date']; ?></span></div>
-                                <div class="spec-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg><span><?php echo $rental['end_date']; ?></span></div>
+                            <p class="stat-label">Total Rentals</p>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <p class="stat-value-large"><?php echo $formattedMiles; ?></p>
+                            <p class="stat-label">Miles Driven</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="main-content">
+        <div class="container">
+
+            <div class="filter-tabs">
+                <button class="filter-tab filter-tab-active" onclick="filterRentals('all', this)">All Rentals</button>
+                <button class="filter-tab" onclick="filterRentals('ongoing', this)">Ongoing</button>
+                <button class="filter-tab" onclick="filterRentals('completed', this)">Completed</button>
+            </div>
+
+            <?php if (empty($rentals)): ?>
+                <div style="text-align: center; padding: 4rem; background: white; border-radius: 1.5rem; border: 1px solid #f3f4f6;">
+                    <h3 style="margin-bottom: 0.5rem; font-size:1.5rem;">No rentals yet</h3>
+                    <p style="color: #6b7280; margin-bottom: 2rem;">Start your luxury journey by booking a car!</p>
+                    <a href="index.php?page=browse"><button class="btn-primary" style="max-width:200px; margin:auto;">Browse Cars</button></a>
+                </div>
+            <?php else: ?>
+
+                <div class="rental-grid" id="rentalGrid">
+                    <?php foreach ($rentals as $rental):
+                        $statusClass = 'status-paid';
+                        if ($rental['status'] === 'ongoing') $statusClass = 'status-ongoing';
+                        elseif ($rental['status'] === 'completed') $statusClass = 'status-completed';
+                        elseif ($rental['status'] === 'cancelled') $statusClass = 'status-cancelled';
+                    ?>
+                        <div class="rental-card" data-status="<?php echo strtolower($rental['status']); ?>">
+                            <div class="rental-image-wrapper">
+                                <img src="<?php echo htmlspecialchars($rental['image_url'] ?: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=80'); ?>" alt="<?php echo htmlspecialchars($rental['brand']); ?>" class="rental-image">
+                                <div class="rental-image-overlay"></div>
+
+                                <div class="rental-status <?php echo $statusClass; ?>">
+                                    ● <?php echo ucfirst($rental['status']); ?>
+                                </div>
+
+                                <div class="rental-car-name">
+                                    <h3 class="rental-car-title"><?php echo htmlspecialchars($rental['brand']); ?></h3>
+                                    <p class="rental-car-model"><?php echo htmlspecialchars($rental['model']); ?></p>
+                                </div>
                             </div>
-                            <div class="car-footer">
-                                <div>
-                                    <div class="car-price">$<?php echo number_format($rental['total_price'], 2); ?></div>
-                                    <div class="price-label"><?php echo $rental['payment_status'] === 'paid' ? 'Paid' : 'Pending'; ?></div>
+
+                            <div class="rental-content">
+                                <div class="rental-price-section">
+                                    <div>
+                                        <p class="rental-price-label">Total Amount</p>
+                                        <p class="rental-price">$<?php echo number_format($rental['total_price'], 2); ?></p>
+                                    </div>
+                                </div>
+
+                                <div class="rental-details">
+                                    <div class="rental-detail-row">
+                                        <span class="rental-detail-label">Start Date</span>
+                                        <span class="rental-detail-value"><?php echo date('Y-m-d', strtotime($rental['start_date'])); ?></span>
+                                    </div>
+                                    <div class="rental-detail-row">
+                                        <span class="rental-detail-label">End Date</span>
+                                        <span class="rental-detail-value"><?php echo date('Y-m-d', strtotime($rental['end_date'])); ?></span>
+                                    </div>
+                                    <div class="rental-detail-row">
+                                        <span class="rental-detail-label rental-location">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                                <circle cx="12" cy="10" r="3"></circle>
+                                            </svg>
+                                            Location
+                                        </span>
+                                        <span class="rental-detail-value">Monaco</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
+    <script>
+        function filterRentals(status, btn) {
+            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('filter-tab-active'));
+            btn.classList.add('filter-tab-active');
+            document.querySelectorAll('.rental-card').forEach(card => {
+                if (status === 'all' || card.dataset.status === status) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
 <?php
     }
 
-    // ============================================
+
     // PAGE ROUTER
-    // ============================================
+
     $page = sanitize($_GET['page'] ?? 'home');
 
     renderHeader();
