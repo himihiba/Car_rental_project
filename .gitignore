@@ -1,0 +1,26 @@
+# Database configuration file with sensitive credentials
+config.php
+
+# Environment files
+.env
+.env.local
+
+# Backup files
+*.sql
+*.backup
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.log
+
+
