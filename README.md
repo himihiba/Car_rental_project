@@ -20,7 +20,7 @@ Try out the system with the demo accounts listed under the login form
 - [Security](#security)
 - [Usage Guide](#usage-guide)
 
-## Features
+##Features
 
 ### For Clients
 - **User Registration & Authentication** - Secure account creation and login
@@ -42,7 +42,7 @@ Try out the system with the demo accounts listed under the login form
 - **Payment Tracking** - Monitor payment status and revenue
 - **Staff Management** - Manage employees across agencies
 
-### System Features
+###System Features
 - **Multi-Agency Support** - Manage multiple rental locations
 - **Automated Status Updates** - Automatic car status changes based on rental state
 - **Revenue Analytics** - View revenue by month
@@ -50,7 +50,7 @@ Try out the system with the demo accounts listed under the login form
 - **Stored Procedures** - Efficient rental completion processing
 - **Sample Data** - Pre-loaded demo data for testing
 
-## 🛠 Technologies Used
+##Technologies Used
 
 - **Backend:** PHP 7.4+
 - **Database:** MySQL 5.7+
@@ -60,14 +60,14 @@ Try out the system with the demo accounts listed under the login form
 - **Frontend:** HTML5, CSS3 (embedded in PHP)
 - **Hosting:** Compatible with XAMPP, InfinityFree, and other PHP hosting platforms
 
-## Installation
+##Installation
 
-### Prerequisites
+###Prerequisites
 - PHP 7.4 or higher
 - MySQL 5.7 or higher
 - Web server (Apache/Nginx) or XAMPP
 
-### Steps
+###Steps
 
 1. **Clone or Download the Project**
    ```bash
@@ -98,28 +98,28 @@ Try out the system with the demo accounts listed under the login form
    - Navigate to: `http://localhost/Car_rental_project/himihiba.php`
    - The database will initialize automatically on first load
 
-### Session Configuration
+###Session Configuration
 The system uses a custom session name for security:
 ```php
 session_name("himihiba_carRental");
 ```
 
-### File Upload Directory
+###File Upload Directory
 Car images are stored in: `uploads/cars/`
 
-## User Roles & Default Credentials
+##User Roles & Default Credentials
 
 The system comes with pre-configured demo accounts:
 
-### Client Accounts
+###Client Accounts
 | Name | Email | Password | Driver License |
 |------|-------|----------|----------------|
 | Alice Moreau | client@email.com | client123 | DL-CLIENT-01 |
 | Bob Durand | bob.durand@email.com | client456 | DL-CLIENT-02 |
 
-### Staff Accounts
+###Staff Accounts
 
-#### Super Administrator
+####Super Administrator
 - **Email:** super@luxdrive.com
 - **Password:** super123
 - **Access:** All agencies, full system control
@@ -138,7 +138,7 @@ The system comes with pre-configured demo accounts:
 | Agent | Sophie Martin | agent2@luxdrive.com | agent123 |
 | Mechanic | Hugo Laurent | mech2@luxdrive.com | mech123 |
 
-## Project Structure
+##Project Structure
 
 ```
 Car_rental_project/
@@ -150,7 +150,7 @@ Car_rental_project/
 
 
 
-##  Key Functionalities
+##Key Functionalities
 
 ### 1. Authentication System
 - Secure password hashing using PHP's `password_hash()`
@@ -223,7 +223,7 @@ This project is developed for educational and commercial purposes.
 - **Repository:** Car_rental_project
 - **Platform:** GitHub
 
-##  Contributing
+## Contributing
 
 Contributions are welcome! Feel free to submit issues or pull requests to improve the system.
 
