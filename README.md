@@ -6,6 +6,10 @@ A comprehensive web-based car rental management system built with PHP and MySQL,
 
 **[View Live Demo →](https://luxdrive.infinityfreeapp.com/himihiba.php)**
 
+![1](https://github.com/user-attachments/assets/897e3879-49e9-42ad-a016-4033c64c0fd0)
+![2](https://github.com/user-attachments/assets/d4ba058b-abc2-4a19-9696-f57212999717)
+![3](https://github.com/user-attachments/assets/ed4f074d-1f0a-42d8-b57f-ce944a4d7e21)
+
 Try out the system with the demo accounts listed under the login form
 
 ## Table of Contents
@@ -22,15 +26,21 @@ Try out the system with the demo accounts listed under the login form
 
 ### For Clients
 - **User Registration & Authentication** - Secure account creation and login
+  ![6](https://github.com/user-attachments/assets/f2772238-b8ed-49b7-9290-b162033839bd)
 - **Browse Available Cars** - View luxury car fleet with detailed specifications
+  ![5](https://github.com/user-attachments/assets/d5880f55-7f83-45c9-89bd-96b402f6d1bc)
 - **Advanced Car Search** - Filter by brand, type, transmission, and more
 - **Online Booking System** - Reserve cars with date selection and pricing calculation
+  ![8](https://github.com/user-attachments/assets/ac99c002-670b-4e61-a2a5-82009c17ec2d)
 - **Rental History** - Track current and past rentals
+  ![7](https://github.com/user-attachments/assets/f5ff7c20-a376-4652-ae32-895d17ffc844)
 - **Payment Management** - Multiple payment methods (cash, credit card, debit card, bank transfer)
 - **Profile Management** - Update personal information
+  ![4](https://github.com/user-attachments/assets/faa64e04-8779-4399-8a98-ced0c198d92f)
 - **Rental Cancellation** - Cancel ongoing rentals when needed
 
 ### For Staff
+![9](https://github.com/user-attachments/assets/1f8383c9-5111-4113-aa40-ffb5e23a78d7)
 - **Role-Based Access Control** - Different permissions for Super Admin, Admin, Agent, and Mechanic
 - **Agency Management** - Manage multiple agency branches
 - **Fleet Management** - Add, update, and track vehicle status
